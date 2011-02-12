@@ -93,25 +93,6 @@ end
 $db = Store.new
 $db.reset_status
 
-stmt = $db.db.prepare('UPDATE people SET digest=? WHERE id=?')
-
-n = i = 0
-results = $db.db.query('SELECT id,url,name FROM people')
-file = nil
-results.each { |x|
-  file ||= File.new("people-#{n}.csv", 'w')
-  file.puts x[1,2].join("\t")
-  i += 1
-  if i % 1000000 == 0
-    n += 1
-    i = 0
-    file.close
-    file = nil
-  end
-}
-file.close unless i == 0
-exit
-
 
 n = 0
 while true do
