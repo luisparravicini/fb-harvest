@@ -24,13 +24,6 @@ class Store
   end
 
   def update(id, nodes, leaves)
-    people, queue = update_db(id, nodes, leaves)
-    dump_to_disk
-
-    [people, queue]
-  end
-
-  def update_db(id, nodes, leaves)
     people = queue = 0
 
     @db.transaction do |db|
@@ -54,19 +47,6 @@ class Store
     end
 
     [people, queue]
-  end
-
-  def dump_to_disk
-    return if people_size < 100000
-
-    result = @db.execute('SELECT url, name FROM people')
-    fname = "directory-#{Time.now.to_i}"
-    raise "file exists! #{fname}" if File.exists?(fname)
-    File.open(fname, 'w') do |io|
-      result.each { |r| io.puts r.join("\t") }
-    end
-    @db.execute("DELETE FROM people")
-    @db.execute("VACUUM");
   end
 
   def finish(id)
@@ -141,5 +121,9 @@ while true do
   puts buf
 
   n += 1
-  puts "queue: #{$db.queue_size}" if n % 50 == 0
+  if n % 50 == 0
+    queue = $db.queue_size
+    people = $db.people_size
+    puts "queue: #{queue}, people: #{people}"
+  end
 end
