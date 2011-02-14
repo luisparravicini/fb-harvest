@@ -3,13 +3,60 @@ require 'mechanize'
 require 'sqlite3'
 
 #
-# if the directory is thought as a tree, each person is on one and only one leaf node so there's no
-# need to check for duplicates
+# if the directory is thought as a tree, each person is on one and only one
+# leaf node so there's no need to check for duplicates
 #
 
-class Store
+class PeopleStore
   def initialize
-    @db = SQLite3::Database.new('facebook.db')
+    @db = SQLite3::Database.new('people.db')
+  end
+
+  def update(leaves)
+    people = update_db(leaves)
+    dump_to_disk
+
+    people
+  end
+
+  def update_db(leaves)
+    people = 0
+
+    @db.transaction do |db|
+      unless leaves.empty?
+        stmt = @db.prepare('INSERT OR IGNORE INTO people (url, name) VALUES(?,?)')
+        leaves.each do |leaf|
+          stmt.execute(leaf[:url], leaf[:title])
+          people += @db.changes
+        end
+      end
+    end
+
+    people
+  end
+
+  def dump_to_disk
+    return if people_size < 100000
+
+    result = @db.execute('SELECT url, name FROM people')
+    fname = "directory-#{Time.now.to_i}"
+    raise "file exists! #{fname}" if File.exists?(fname)
+    File.open(fname, 'w') do |io|
+      result.each { |r| io.puts r.join("\t") }
+    end
+    @db.execute("DELETE FROM people")
+    @db.execute("VACUUM");
+  end
+
+  def people_size
+    @db.execute('SELECT COUNT(1) FROM people').first.first
+  end
+
+end
+
+class QueueStore
+  def initialize
+    @db = SQLite3::Database.new('queue.db')
   end
 
   def reset_status
@@ -23,15 +70,8 @@ class Store
     end
   end
 
-  def update(id, nodes, leaves)
-    people, queue = update_db(id, nodes, leaves)
-    dump_to_disk
-
-    [people, queue]
-  end
-
-  def update_db(id, nodes, leaves)
-    people = queue = 0
+  def update(id, nodes)
+    queue = 0
 
     @db.transaction do |db|
       unless leaves.empty?
@@ -53,20 +93,7 @@ class Store
       finish(id)
     end
 
-    [people, queue]
-  end
-
-  def dump_to_disk
-    return if people_size < 100000
-
-    result = @db.execute('SELECT url, name FROM people')
-    fname = "directory-#{Time.now.to_i}"
-    raise "file exists! #{fname}" if File.exists?(fname)
-    File.open(fname, 'w') do |io|
-      result.each { |r| io.puts r.join("\t") }
-    end
-    @db.execute("DELETE FROM people")
-    @db.execute("VACUUM");
+    queue
   end
 
   def finish(id)
@@ -76,11 +103,6 @@ class Store
   def queue_size
     @db.execute('SELECT COUNT(1) FROM queue WHERE status IS NULL').first.first
   end
-
-  def people_size
-    @db.execute('SELECT COUNT(1) FROM people').first.first
-  end
-attr_reader :db
 
 end
 
@@ -110,9 +132,24 @@ def parse(page)
   links.partition { |link| link[:url] =~ %r{/directory/} }
 end
 
+class Store
+  def initialize
+    @queue = QueueStore.new
+    @people = PeopleStore.new
+  end
+
+  def reset_status
+    @queue.reset_status
+  end
+
+  def update(id, nodes, leaves)
+    [ @queue.update(id, nodes), @people.update(leaves) ]
+  end
+end
 
 $db = Store.new
 $db.reset_status
+
 
 
 n = 0
