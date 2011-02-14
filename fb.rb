@@ -132,10 +132,10 @@ class Downloader
   end
 
   def get(url)
-      agent = Mechanize.new
-      agent.user_agent_alias = 'Windows IE 7'
+    agent = Mechanize.new
+    agent.user_agent_alias = 'Windows IE 7'
 
-      parse(download(agent, url))
+    parse(download(agent, url))
   end
 
   protected
@@ -186,7 +186,7 @@ class Harvester
       url = result.last
         
       nodes, leaves = @downloader.get(url)
-      people, queue = @db.update(id, nodes, leaves)
+      queue, people = @db.update(id, nodes, leaves)
 
       print_stats(queue, nodes, people, leaves)
 
