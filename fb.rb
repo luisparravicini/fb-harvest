@@ -90,7 +90,8 @@ def download(agent, url)
   begin
     print url
     return agent.get(url)
-  rescue Errno::ECONNREFUSED, Timeout::Error, Net::HTTPInternalServerError
+  rescue Errno::ECONNREFUSED, Timeout::Error, Net::HTTPInternalServerError,
+  Errno::ETIMEDOUT
     retries += 1
     puts " Error: #{$!.message}"
     if retries > 3
