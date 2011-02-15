@@ -78,7 +78,7 @@ class QueueStore
     @db.transaction do |db|
       unless nodes.empty?
         stmt = @db.prepare('INSERT OR IGNORE INTO queue (url) VALUES(?)')
-        nodes.each do |node|
+        nodes.sort_by { rand }.each do |node|
           stmt.execute(node[:url])
           queue += @db.changes
         end

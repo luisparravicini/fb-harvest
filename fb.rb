@@ -33,7 +33,7 @@ class Harvester
       id = result.first
       url = result.last
         
-      @downloader.get(url) do |nodes, leaves|
+      @downloader.get(url) do |nodes, leaves, url|
         queue, people = @db.update(id, nodes, leaves)
         print_stats(url, queue, nodes, people, leaves)
         n += 1

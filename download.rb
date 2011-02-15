@@ -4,7 +4,7 @@ class DownloaderWorker
     agent.user_agent_alias = 'Windows IE 7'
 
     nodes, leaves = parse(download(agent, url))
-    b.call(nodes, leaves)
+    b.call(nodes, leaves, url)
   end
 
   protected
@@ -49,7 +49,7 @@ class Downloader
             t, b = value
             alive = t.alive?
 
-            b.call(t['nodes'], t['leaves']) if not alive
+            b.call(t['nodes'], t['leaves'], url) if not alive
 
             not alive
           end
@@ -66,7 +66,7 @@ class Downloader
       @mutex.synchronize do
         if @workers.size <= @max_workers
           t = Thread.new(url) do |url|
-            DownloaderWorker.new.get(url) do |nodes, leaves|
+            DownloaderWorker.new.get(url) do |nodes, leaves, _|
               Thread.current['nodes'] = nodes
               Thread.current['leaves'] = leaves
             end
