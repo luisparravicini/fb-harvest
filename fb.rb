@@ -23,11 +23,18 @@ class Harvester
 
   def run
     n = 0
+    almost_none = false
     while true do
       result = @db.next
       if result.nil?
-        puts "No more URLs"
-        break
+        if almost_none
+          puts "No more URLs"
+          break
+        end
+
+        almost_none = true
+        @downloader.wait_for_workers
+        next
       end
 
       id = result.first
@@ -43,7 +50,7 @@ class Harvester
         end
       end
     end
-    @downloader.wait_workers
+    @downloader.finish
   end
 
   protected

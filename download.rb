@@ -80,8 +80,13 @@ class Downloader
     end
   end
 
-  def wait_workers
+  def wait_for_workers
+    sleep 0.5 while not @workers.empty?
+  end
+
+  def finish
     @workers.values.each { |t| t.first.join }
+
     @scheduler['stop'] = true
     @scheduler.join
   end
