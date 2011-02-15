@@ -64,7 +64,7 @@ class QueueStore
   end
 
   def next
-    result = @db.execute('SELECT id, url FROM queue WHERE STATUS IS NULL ORDER BY RANDOM() LIMIT 1')
+    result = @db.execute('SELECT id, url FROM queue WHERE status IS NULL LIMIT 1')
     unless result.empty?
       result.first.tap do |r|
         @db.execute("UPDATE queue SET status=0 WHERE id=#{r.first}")
