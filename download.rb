@@ -46,10 +46,10 @@ class Downloader
       while not quit
         mutex.synchronize do
           workers.delete_if do |url, value|
-            t, b = value
+            t, b, id = value
             alive = t.alive?
 
-            b.call(t['nodes'], t['leaves'], url) if not alive
+            b.call(t['nodes'], t['leaves'], url, id) if not alive
 
             not alive
           end
@@ -60,18 +60,18 @@ class Downloader
     end
   end
 
-  def get(url, &b)
+  def get(url, id, &b)
     added = false
     while not added do
       @mutex.synchronize do
         if @workers.size <= @max_workers
-          t = Thread.new(url) do |url|
+          t = Thread.new(url, id) do |url, id|
             DownloaderWorker.new.get(url) do |nodes, leaves, _|
               Thread.current['nodes'] = nodes
               Thread.current['leaves'] = leaves
             end
           end
-          @workers[url] = [t, b]
+          @workers[url] = [t, b, id]
           added = true
         end
       end
