@@ -38,7 +38,7 @@ class PeopleStore
   end
 
   def dump_to_disk
-    return if people_size < 500000
+    return if people_size < 1000000
 
     result = @db.execute('SELECT url, name FROM people')
     fname = "#{OUT_DIR}/directory-#{Time.now.to_i}"
