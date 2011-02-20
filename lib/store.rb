@@ -1,3 +1,5 @@
+OUT_DIR = 'out'
+
 module BaseStore
   def self.open_db(fname)
     unless File.exists?(fname)
@@ -39,7 +41,8 @@ class PeopleStore
     return if people_size < 500000
 
     result = @db.execute('SELECT url, name FROM people')
-    fname = "directory-#{Time.now.to_i}"
+    fname = "#{OUT_DIR}/directory-#{Time.now.to_i}"
+    FileUtils.mkdir_p(OUT_DIR) unless File.directory?(OUT_DIR)
     raise "file exists! #{fname}" if File.exists?(fname)
     File.open(fname, 'w') do |io|
       result.each { |r| io.puts r.join("\t") }
