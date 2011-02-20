@@ -65,8 +65,3 @@ class Harvester
   end
 end
 
-
-$db = Store.new
-$db.reset_status
-
-Harvester.new($db).run
