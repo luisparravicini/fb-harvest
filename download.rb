@@ -18,11 +18,11 @@ class DownloaderWorker
     Errno::ETIMEDOUT, EOFError, SocketError
       retries += 1
       puts " Error: #{$!.message}"
-      if retries > 3
+      if retries > 5
         puts "Too many retries"
         exit
       end
-      sleep 15
+      sleep 15*retries
       retry
     end
   end
