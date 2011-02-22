@@ -1,3 +1,5 @@
+require 'sqlite3'
+
 OUT_DIR = 'out'
 
 module BaseStore

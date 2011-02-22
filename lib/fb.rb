@@ -1,9 +1,7 @@
 
 $LOAD_PATH << File.join(File.dirname(__FILE__))
 
-require 'mechanize'
 require 'fileutils'
-require 'sqlite3'
 require 'store'
 require 'download'
 
