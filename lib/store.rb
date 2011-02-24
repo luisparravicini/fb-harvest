@@ -43,12 +43,12 @@ class PeopleStore
     return if people_size < 1000000
 
     result = @db.execute('SELECT url, name FROM people')
-    fname = "#{OUT_DIR}/directory-#{Time.now.to_i}"
-    FileUtils.mkdir_p(OUT_DIR) unless File.directory?(OUT_DIR)
-    raise "file exists! #{fname}" if File.exists?(fname)
-    File.open(fname, 'w') do |io|
-      result.each { |r| io.puts r.join("\t") }
-    end
+
+    fname = new_people_fname
+    ftmp = fname + '.tmp'
+    File.open(ftmp, 'w') { |io| result.each { |r| io.puts r.join("\t") } }
+    FileUtils.mv(ftmp, fname)
+
     @db.execute("DELETE FROM people")
     @db.execute("VACUUM");
   end
@@ -57,6 +57,12 @@ class PeopleStore
     @db.execute('SELECT COUNT(1) FROM people').first.first
   end
 
+  def new_people_fname
+    "#{OUT_DIR}/directory-#{Time.now.to_i}".tap do |fname|
+      FileUtils.mkdir_p(OUT_DIR) unless File.directory?(OUT_DIR)
+      raise "File exists! #{fname}" if File.exists?(fname)
+    end
+  end
 end
 
 class QueueStore
