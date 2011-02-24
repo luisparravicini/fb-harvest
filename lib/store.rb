@@ -42,12 +42,14 @@ class PeopleStore
   def dump_to_disk
     return if people_size < 1000000
 
-    result = @db.execute('SELECT url, name FROM people')
-
     fname = new_people_fname
-    ftmp = fname + '.tmp'
-    File.open(ftmp, 'w') { |io| result.each { |r| io.puts r.join("\t") } }
-    FileUtils.mv(ftmp, fname)
+    tmp = fname + '.tmp'
+    File.open(tmp, 'w') do |io|
+      @db.execute('SELECT url, name FROM people') do |row|
+        io.puts row.join("\t")
+      end
+    end
+    FileUtils.mv(tmp, fname)
 
     @db.execute("DELETE FROM people")
     @db.execute("VACUUM");
@@ -58,10 +60,18 @@ class PeopleStore
   end
 
   def new_people_fname
-    "#{OUT_DIR}/directory-#{Time.now.to_i}".tap do |fname|
-      FileUtils.mkdir_p(OUT_DIR) unless File.directory?(OUT_DIR)
-      raise "File exists! #{fname}" if File.exists?(fname)
+    FileUtils.mkdir_p(OUT_DIR) unless File.directory?(OUT_DIR)
+    fname = nil
+    while fname.nil? do
+      fname = "#{OUT_DIR}/directory-#{Time.now.to_f}"
+      if File.exists?(fname)
+        puts "File exists! #{fname}"
+        fname = nil
+        sleep 0.5
+      end
     end
+
+    fname
   end
 end
 

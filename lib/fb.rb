@@ -4,6 +4,7 @@ $LOAD_PATH << File.join(File.dirname(__FILE__))
 require 'fileutils'
 require 'store'
 require 'download'
+require 'compress'
 
 $stdout.sync = true
 Thread.abort_on_exception = true
