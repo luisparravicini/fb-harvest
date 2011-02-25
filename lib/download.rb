@@ -17,7 +17,8 @@ class DownloaderWorker
     begin
       agent.get(url)
     rescue Errno::ECONNREFUSED, Timeout::Error, Net::HTTPInternalServerError,
-    Errno::ETIMEDOUT, EOFError, SocketError, Mechanize::ResponseCodeError
+    Errno::ETIMEDOUT, EOFError, SocketError, Mechanize::ResponseCodeError,
+    Errno::ECONNRESET
       retries += 1
       puts " Error: #{$!.message}"
       if retries > 5
