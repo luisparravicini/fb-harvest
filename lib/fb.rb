@@ -50,6 +50,9 @@ class Harvester
       end
     end
     @downloader.finish
+
+    # no more URLs to process, dump what is left in the people db
+    @db.force_dump if @db.queue_size == 0
   end
 
   protected

@@ -39,8 +39,10 @@ class PeopleStore
     people
   end
 
-  def dump_to_disk
-    return if people_size < 1000000
+  def force_dump; dump_to_disk(true); end
+
+  def dump_to_disk(force=false)
+    return if !force && people_size < 1000000
 
     fname = new_people_fname
     tmp = fname + '.tmp'
@@ -137,5 +139,7 @@ class Store
   def next; @queue.next; end
 
   def queue_size; @queue.queue_size; end
+
+  def force_dump; @people.force_dump; end
 end
 
