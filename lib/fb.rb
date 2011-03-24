@@ -1,3 +1,7 @@
+# Scrape the public information on Facebook Directory
+#
+# by Luis Parravicini
+#
 
 $LOAD_PATH << File.join(File.dirname(__FILE__))
 

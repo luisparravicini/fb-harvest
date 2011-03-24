@@ -1,3 +1,8 @@
+# Scrape the public information on Facebook Directory
+#
+# by Luis Parravicini
+#
+
 require 'mechanize'
 
 class DownloaderWorker
